@@ -50,20 +50,25 @@ var dataService
         
         //sets config
         var config = 
+       
         {
-            "options": {
-                "transform-results": {
-                    "apply": "raw" 
-                } 
+          "options": {
+            "transform-results": {
+              "apply": "empty-snippet",
+              "max-matches": 1
             }
+          }
         }
-	
+	       
+
 		var options = {
                   hostname: 'localhost',
                   port: 9092,
                   path: '/v1/config/query/'+collection + '&format=json',
                   method: 'PUT'
                 };
+
+        console.log('\m>>> MarkLogic getAllCars'); 
 
         var req =  http.request(options, function(res) {
             
@@ -75,7 +80,9 @@ var dataService
                 
             }); 
             res.on('end', function () {
-                
+                console.log('\n>> MarkLogic Getting Cars'); 
+             
+                    
             });
             
         });
@@ -84,9 +91,8 @@ var dataService
        
 
         //gets cars
-        //
-        console.log('\n>> MarkLogic getAllCars'); 
-		http.get(connectionString +'/v1/search?collection='+ collection +'&format=json&options='+collection+'&pageLength=4290000000', function(res) {
+     
+		http.get(connectionString +'/v1/search?collection='+ collection +'&format=json&options='+collection+'&pageLength=100000', function(res) {
              
             var result = '';
             res.on('data', function (chunk) {
@@ -94,10 +100,11 @@ var dataService
             });
             res.on('end', function () {
             	console.log('> MarkLogic gotAllCars');     
-                exit('data:gotAllCars', null, result);
+                exit('data:gotAllCars', null, JSON.parse(result).results);
             });
         }).on('error', function(e) {
         	exit('data:gotAllCars', e, null);
+
         });
     };
 
@@ -107,9 +114,14 @@ var dataService
         gotAllCars = function(error, carDetails){
             var result = []
             , iter;
-
+           
+            console.log('carDetails.length =' + carDetails.length);     
             for(iter = 0; iter < carDetails.length; iter++){
-                result.push(carDetails[iter]["adId"]);
+                
+                var uri = carDetails[iter].uri
+                var uri = uri.replace("/cars/car-", "").replace(".json", "");
+
+                result.push(uri);
             }
 
             exit('data:gotAllAdIds', error, result);

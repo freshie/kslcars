@@ -289,7 +289,7 @@ createSentinel = function(eventManager){
         state = 'waiting';
         setTimeout(function() {
             addListPage(global.kslStart);
-        }, 500);
+        }, 5500);
     };
 
     stop = function(){
